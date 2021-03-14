@@ -4,6 +4,7 @@ import com.example.guestbook.entity.GuestBook;
 import com.example.guestbook.entity.QGuestBook;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -61,6 +62,29 @@ public class GuestBookRepositoryTests {
 
         Page<GuestBook> result = guestBookRepository.findAll(builder,pageable);
 
+        result.stream().forEach(guestBook -> {
+            System.out.println(guestBook);
+        });
+
+
+    }
+
+    //제목 or 내용에 키워드가 있고 gno가 0보다 큰거 찾기
+    @Test
+    public void testQuery2(){
+        Pageable pageable = PageRequest.of(0, 10, Sort.by("gno").descending());
+
+        QGuestBook qGuestBook = QGuestBook.guestBook;
+
+        String keyword ="1";
+        BooleanBuilder builder = new BooleanBuilder();
+        BooleanExpression exTitle = qGuestBook.title.contains(keyword);
+        BooleanExpression exContent = qGuestBook.content.contains(keyword);
+        BooleanExpression exAll = exTitle.or(exContent);
+        builder.and(exAll);
+        builder.and(qGuestBook.gno.gt(0L));
+
+        Page<GuestBook> result = guestBookRepository.findAll(builder, pageable);
         result.stream().forEach(guestBook -> {
             System.out.println(guestBook);
         });
